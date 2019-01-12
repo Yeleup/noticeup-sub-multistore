@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>Store Prefix Route</name>
+    <code>Store Prefix Route</code>
+    <version>2.3</version>
+    <author>Dezmonter</author>
+
+    <file path="catalog/controller/common/footer.php">
+        <operation>
+            <search><![CDATA[$this->load->language('common/footer');]]></search>
+            <add position="before"><![CDATA[
+				$data['sla_live_search'] = $this->load->controller('product/sla_live_search/view');
+            ]]></add>
+        </operation>
+    </file>
+
+    <file path="catalog/view/theme/*/template/common/footer.tpl">
+        <operation>
+            <search>
+               <![CDATA[</body>]]>
+            </search>
+            <add position="before"><![CDATA[
+			<?php echo $sla_live_search; ?>
+            ]]></add>
+        </operation>
+    </file>
+</modification>
