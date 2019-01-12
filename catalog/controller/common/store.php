@@ -17,6 +17,12 @@ class ControllerCommonStore extends Controller {
 		$city = $this->db->query("select * from " . DB_PREFIX . "setting where store_id = '0' and  `key` = 'config_zone_id' ");
 		$default_city = $this->db->query("select * from " . DB_PREFIX . "zone where zone_id = ".(int) $city->row['value']." ");
 
+		if (in_array($this->request->get['route'], array('common/home', 'product/product','product/category'))) {
+			$city_request_uri = substr( substr( $_SERVER['REQUEST_URI'], 1), strpos(substr( $_SERVER['REQUEST_URI'], 1), '/') + 1);
+		}else{
+			$city_request_uri = substr( $_SERVER['REQUEST_URI'], 1);
+		}
+
 		$data['stores'][] = array(
 				'store_id' => 0,
 				'name'     => $default_city->row['name'],
@@ -31,7 +37,7 @@ class ControllerCommonStore extends Controller {
 
 			$data['stores'][] = array(
 				'store_id' => $result['store_id'],
-				'url' => $result['url'].substr( $_SERVER['REQUEST_URI'], 1),
+				'url' => $result['url'].$city_request_uri,
 				'name' => $city->row['name']
 				);
 		}
