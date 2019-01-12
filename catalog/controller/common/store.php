@@ -22,7 +22,7 @@ class ControllerCommonStore extends Controller {
 
 		$data['stores'][] = array(
 				'store_id' => 0,
-			  'name'     => $this->config->get('config_name'),
+			  'name'     => 'Астана',
 				'url'      => HTTP_SERVER.substr( $_SERVER['REQUEST_URI'], 1)
 		);
 
