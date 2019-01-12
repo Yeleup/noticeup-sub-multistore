@@ -11,10 +11,12 @@ class ControllerCommonStore extends Controller {
 			$data['code'] = $this->config->get('config_store_id');
 		}
 
+		$config_store_prefix_routes = array_map("trim", explode("\n", $this->config->get('config_store_prefix_routes')));
+
 		$this->load->model('setting/store');
 
 		$data['stores'] = array();
-		if (in_array($this->request->get['route'], array('common/home', 'product/product','product/category'))) {
+		if (in_array($this->request->get['route'], $config_store_prefix_routes)) {
 			$city_request_uri = substr( substr( $_SERVER['REQUEST_URI'], 1), strpos(substr( $_SERVER['REQUEST_URI'], 1), '/') + 1);
 		}else{
 			$city_request_uri = substr( $_SERVER['REQUEST_URI'], 1);
