@@ -168,7 +168,9 @@ class ControllerStartupSeoPro extends Controller {
 				break;
 		}
 
-		if (in_array($route, array('common/home', 'product/product','product/category'))) {
+		$config_store_prefix_routes = array_map("trim", explode("\n", $this->config->get('config_store_prefix_routes')));
+
+		if (in_array($this->request->get['route'], $config_store_prefix_routes)) {
 			$city = $this->config->get('config_city');
 		} else {
 			$city = '';

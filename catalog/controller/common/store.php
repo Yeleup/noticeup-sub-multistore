@@ -27,6 +27,7 @@ class ControllerCommonStore extends Controller {
 			  'name'     => 'Астана',
 				'url'      => HTTP_SERVER.substr( $_SERVER['REQUEST_URI'], 1)
 		);
+		
 
 		$results = $this->model_setting_store->getStores();
 
