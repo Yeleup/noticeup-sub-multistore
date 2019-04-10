@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>Noticeup Store Prefix Route</name>
+    <code>Noticeup Store Prefix Route</code>
+    <version>2.3.x</version>
+    <author>magzhan9292,Dezmonter</author>
+  	<link>http://noticeup.kz/</link>
+
+    <file path="admin/controller/setting/setting.php">
+        <operation>
+            <search><![CDATA[$data['entry_seo_pro_utm'] = $this->language->get('entry_seo_pro_utm');]]></search>
+            <add position="before"><![CDATA[
+				$data['entry_store_prefix_routes'] = $this->language->get('entry_store_prefix_routes');
+            ]]></add>
+        </operation>
+
+        <operation>
+            <search><![CDATA[$data['help_seo_pro_utm'] = $this->language->get('help_seo_pro_utm');]]></search>
+            <add position="before"><![CDATA[
+				$data['help_store_prefix_routes'] = $this->language->get('help_store_prefix_routes');
+            ]]></add>
+        </operation>
+
+        <operation>
+            <search><![CDATA[if (isset($this->request->post['config_seo_pro_utm'])) {]]></search>
+            <add position="before"><![CDATA[
+		if (isset($this->request->post['config_store_prefix_routes'])) {
+			$data['config_store_prefix_routes'] = $this->request->post['config_store_prefix_routes'];
+		} else {
+			$data['config_store_prefix_routes'] = $this->config->get('config_store_prefix_routes');
+		}
+            ]]></add>
+        </operation>
+    </file>
+
+    <file path="admin/view/template/setting/setting.tpl">
+        <operation>
+            <search>
+               <![CDATA[<label class="col-sm-2 control-label" for="input-seo_pro_utm"><span data-toggle="tooltip" title="<?php echo $help_seo_pro_utm; ?>"><?php echo $entry_seo_pro_utm; ?></span></label>]]>
+            </search>
+            <add position="before" offset="1"><![CDATA[
+                <div class="form-group">
+                  <label class="col-sm-2 control-label" for="input-store-prefix-routes"><span data-toggle="tooltip" title="<?php echo $help_store_prefix_routes; ?>"><?php echo $entry_store_prefix_routes; ?></span></label>
+                  <div class="col-sm-10">
+                    <textarea name="config_store_prefix_routes" rows="5" placeholder="<?php echo $entry_store_prefix_routes; ?>" id="input-store-prefix-routes" class="form-control"><?php echo $config_store_prefix_routes; ?></textarea>
+                  </div>
+                </div>
+            ]]></add>
+        </operation>
+    </file>
+
+    <file path="admin/language/*/setting/setting.php">
+        <operation>
+            <search>
+               <![CDATA[$_['entry_seo_pro_utm'] ]]>
+            </search>
+            <add position="before" offset="2"><![CDATA[$_['entry_store_prefix_routes']        = 'Список route для которых необходимо подставлять магазин в url';]]></add>
+        </operation>
+
+        <operation>
+            <search>
+               <![CDATA[$_['help_seo_url']  ]]>
+            </search>
+            <add position="before" offset="2"><![CDATA[$_['help_store_prefix_routes']         = 'Внимание! Каждое значение с новой строки';]]></add>
+        </operation>
+    </file>
+
+    <!--modification startup-->
+    <file path="catalog/controller/startup/startup.php">
+      <operation>
+          <search><![CDATA[public function index() {]]></search>
+          <add position="after"><![CDATA[
+                //StorePrefix
+            		$url = parse_url($_SERVER['REQUEST_URI']);
+            		$parts = explode('/',trim($url['path'],'/'));
+            		$city = $parts[0];
+
+            		if (isset($this->request->server['HTTPS']) && (($this->request->server['HTTPS'] == 'on') || ($this->request->server['HTTPS'] == '1'))) {
+            			$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "store WHERE REPLACE(`ssl`, 'www.', '') = '" . $this->db->escape('https://' . str_replace('www.', '', $_SERVER['HTTP_HOST']) . '/' . rtrim($city, '/.\\') . '/') . "'");
+            		} else {
+            			$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "store WHERE REPLACE(`url`, 'www.', '') = '" . $this->db->escape('http://' . str_replace('www.', '', $_SERVER['HTTP_HOST']) . '/' . rtrim($city, '/.\\') . '/') . "'");
+            		}
+
+            		if (isset($this->request->get['_route_']) && isset($query->row['store_id'])) {
+            			$this->request->get['_route_'] = str_replace($city , '', $this->request->get['_route_']);
+            			$this->session->data['store_id'] = $query->row['store_id'];
+            			$this->session->data['config_store_city'] = $city;
+            		}
+
+            		if (isset($this->session->data['config_store_city'])) {
+            			$city = $this->session->data['config_store_city'];
+            		}
+
+            		if (isset($this->request->get['store_id'])) {
+            			if (isset($this->session->data['store_id'])) {
+            				$this->config->set('config_store_id', $this->session->data['store_id']);
+            			}else{
+            				$this->config->set('config_store_id', (int)$this->request->get['store_id']);
+            			}
+            		} else if ($query->num_rows) {
+            			$this->config->set('config_store_city', $city);
+
+            			if (isset($this->session->data['store_id'])) {
+            				$this->config->set('config_store_id', $this->session->data['store_id']);
+            			}else{
+            				$this->config->set('config_store_id', $query->row['store_id']);
+            			}
+            		} else {
+            			$this->config->set('config_store_city', '');
+
+            			if (isset($this->session->data['store_id'])) {
+            				$this->config->set('config_store_id', $this->session->data['store_id']);
+            			}else{
+            				$this->config->set('config_store_id', 0);
+            			}
+            		}
+
+            		if(!empty($this->config->get('config_store_city'))){
+            			goto skip;
+            		}
+            ]]></add>
+      </operation>
+
+      <operation>
+          <search><![CDATA[// Settings]]></search>
+          <add position="before"><![CDATA[
+            //StorePrefix
+		        skip:
+            ]]></add>
+      </operation>
+
+      <operation>
+          <search><![CDATA[// Url]]></search>
+          <add position="before"><![CDATA[
+            //StorePrefix
+            if(!empty($this->config->get('config_store_city'))){
+        			$this->config->set('config_url', HTTP_SERVER);
+        			$this->config->set('config_ssl', HTTPS_SERVER);
+        		}
+            ]]></add>
+      </operation>
+      <!--<operation>
+          <search>
+             <![CDATA[]]>
+          </search>
+          <add position="after"><![CDATA[
+
+            ]]></add>
+      </operation>-->
+    </file>
+
+    <!--modification seo_pro-->
+    <file path="catalog/controller/startup/seo_pro.php">
+      <operation>
+          <search><![CDATA[$this->request->get['route'] = 'error/not_found';]]></search>
+          <add position="replace"><![CDATA[
+            $config_store_prefix_routes = array_map("trim", explode("\n", $this->config->get('config_store_prefix_routes')));
+            if(!empty($this->config->get('config_store_city')) && isset($this->request->get['route'])){
+    					if (in_array($this->request->get['route'], $config_store_prefix_routes)) {
+    						goto skip;
+    					}
+    				}
+    				$this->request->get['route'] = 'error/not_found';
+    				skip:
+            ]]>
+          </add>
+      </operation>
+      <operation>
+          <search index="0"><![CDATA[if ($component['scheme'] == 'https') {]]></search>
+          <add position="before"><![CDATA[
+            //StorePrefix
+            $config_store_prefix_routes = array_map("trim", explode("\n", $this->config->get('config_store_prefix_routes')));
+
+        		$city = '';
+        		if(!empty($this->config->get('config_store_city')) && isset($this->request->get['route'])){
+        			if (in_array($this->request->get['route'], $config_store_prefix_routes )) {
+        				$city = $this->config->get('config_store_city') . '/';
+        			}
+        		}
+            ]]></add>
+      </operation>
+      <operation>
+          <search>
+             <![CDATA[$link .= 'index.php?route=' . $route;]]>
+          </search>
+          <add position="replace"><![CDATA[
+      //StorePrefix
+  		$link .= $city . 'index.php?route=' . $route;
+            ]]></add>
+      </operation>
+      <operation>
+          <search>
+             <![CDATA[$seo_url = trim($seo_url, '/');]]>
+          </search>
+          <add position="replace"><![CDATA[
+      //StorePrefix
+  		$seo_url = $city . trim($seo_url, '/');
+            ]]></add>
+      </operation>
+    </file>
+
+    <!--VIEW-->
+    <file path="catalog/controller/common/header.php">
+      <operation>
+          <search>
+             <![CDATA[$data['language'] = $this->load->controller('common/language');]]>
+          </search>
+          <add position="after"><![CDATA[
+          //store_prefix_route
+          $data['sub_stores'] = $this->load->controller('common/store');
+            ]]></add>
+      </operation>
+    </file>
+    <file path="catalog/view/theme/default/template/common/header.tpl">
+      <operation>  
+          <search>
+             <![CDATA[<?php echo $language; ?>]]>
+          </search>
+          <add position="after"><![CDATA[
+          <!--store_prefix_route-->
+          <?php echo $sub_stores; ?>
+            ]]></add>
+      </operation>
+    </file>
+</modification>

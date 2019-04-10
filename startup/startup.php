@@ -27,6 +27,7 @@ class ControllerStartupStartup extends Controller {
 			}
 		}
 	}
+
 if (isset($this->session->data['store_city'])) {
 	$this->config->set('config_city', $this->session->data['store_city']);
 } else {
@@ -57,6 +58,21 @@ if (isset($this->session->data['store_city'])) {
 				$this->config->set('config_store_id', 0);
 			}
 		}
+
+		//Например Cписок магазинов
+		/*$stores = array(
+				0 => 'http://test.noticeup.kz/',
+				1 => 'http://test.noticeup.kz/almaty/',
+				2 => 'http://test.noticeup.kz/astana/'
+		);
+
+		//Magzhan's change
+
+		foreach ($stores as $key => $store) {
+			if( $this->config->get('config_url') == $store ){
+				$this->config->set('config_store_id', $key);
+			}
+		}*/
 
 //		if (!$query->num_rows) {
 			$this->config->set('config_url', HTTP_SERVER);

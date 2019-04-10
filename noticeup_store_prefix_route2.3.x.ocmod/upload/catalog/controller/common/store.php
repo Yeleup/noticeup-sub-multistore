@@ -27,7 +27,7 @@ class ControllerCommonStore extends Controller {
 			  'name'     => 'Астана',
 				'url'      => HTTP_SERVER.substr( $_SERVER['REQUEST_URI'], 1)
 		);
-		
+
 
 		$results = $this->model_setting_store->getStores();
 
@@ -75,15 +75,6 @@ class ControllerCommonStore extends Controller {
 	}
 
 	public function store() {
-
-		if (isset($this->request->post['code'])) {
-			if ($this->request->post['code'] == 0) {
-				unset($this->session->data['store_id']);
-				unset($this->session->data['store_city']);
-			} else {
-				$this->session->data['store_id'] = $this->request->post['code'];
-			}
-		}
 
 		if (isset($this->request->post['redirect'])) {
 			$this->response->redirect($this->request->post['redirect']);
